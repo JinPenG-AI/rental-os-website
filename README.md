@@ -1,68 +1,78 @@
-# Rental OS 官网 2.0 — 文案与双语阶段
+# Rental OS 官网 · Next.js 源码工程
 
-这是重新编写的 HTML / CSS / JavaScript 首页，不是把下载站的编译 bundle 再包一层，也不是恢复作者原始 Framer 工程。
+沿用原站的技术路线：Next.js App Router、React、next-intl、Framer Motion，以及 WebGL / Three.js 动效。保留当前 Rental OS 官网的文案、布局、业务演示、预约入口和社交链接；这是从现有发布版迁移整理的可编辑源码，不是原作者未公开的开发工程。
 
-首页文字已调整为 Rental OS 的业务定位与能力介绍，并提供简体中文和英文。品牌素材保留 Rental OS 文件名，并放在模板对应的目录：页头及页脚小 Logo 共用 `assets/icons/rentalos-logo.svg`，页底大字使用 `assets/images/rentalos-wordmark.svg`，均复制自 `Rental-OS_Brand-Assets/01_Logo/新版/` 中用户提供的纯黑 SVG；浏览器标签页和首屏“Rental OS 平台”轮播选项共用 `assets/images/rentalos-icon-color.svg`，使用用户提供的渐变色图标。品牌原文件未改动。页头在深色首屏通过 CSS 反色显示为白色，滚动后及移动端浅色菜单显示黑色。原模板其余图片、Lottie 和整体排版、动效仍保留；旧官网在上一级 `index.html`，没有覆盖。
+## 启动和构建
 
-模板中的客户评价、业绩数字与 GDPR/德国托管声明没有作为 Rental OS 的真实案例使用。故事区改为明确标注的租赁业务场景示例，数字区改为平台能力文案。其余图片和动画素材内的原模板英文尚未替换。
+需要 Node.js 20.9 或以上。依赖与锁文件位于本目录，不需要修改仓库根依赖。
 
-## 预览
+```powershell
+npm ci --workspaces=false
+npm run dev --workspaces=false
+```
 
-Windows 下双击本目录的 `start-preview.cmd`，会用本机 Python 3 启动静态服务并打开 `http://127.0.0.1:4178/`。关闭命令窗口或按 Ctrl+C 可停止预览。也可以用任意静态 HTTP 服务器服务仓库根目录。以上均为本地地址，不是线上地址。
+也可双击 `start-preview.cmd`。源码开发预览默认 http://127.0.0.1:8140/harness/ ，修改组件后支持热刷新。
 
-部署时直接上传仓库根目录的 `index.html`、`styles.css`、`js/` 和 `assets/`，GitHub Pages 工作流会自动复制这些文件。不用 React、Framer、npm 安装或编译。建议通过 HTTP 预览，不要双击 HTML：Lottie JSON 和 WebGL shader 使用 `fetch`，本地文件协议可能阻止加载。
+```powershell
+npm run check:source --workspaces=false
+npm run build --workspaces=false
+npm start --workspaces=false
+```
 
-## 后续修改位置
+构建生成 `out/`，部署时发布其中的内容；`npm start` 是静态产物预览，不是旧镜像适配服务。开发和静态预览默认共用 8140，不要同时占用；静态预览可执行 `node tools/serve-export.mjs --port 8141`。
 
-| 要修改的内容 | 文件 |
-| --- | --- |
-| 文案、导航、按钮链接、图片引用、卡片结构 | `index.html` |
-| 颜色、字体、间距、尺寸、布局、响应式规则 | `styles.css` |
-| 菜单、轮播、卡片堆叠、入场动画、Lottie 控制 | `js/main.js` |
-| 中英文文案、语言选择器、语言偏好 | `js/i18n.js` |
-| 底部动态波纹背景的 WebGL 渲染及参数 | `js/effects.js` |
-| 图片及标志 | `assets/images/` |
-| 原模板图标 | `assets/icons/` |
-| 原模板字体 | `assets/fonts/` |
-| 原 Lottie JSON 和波纹 shader | `assets/animations/` |
+## 正常开发目录
 
-`styles.css` 顶部 `:root` 是通用颜色与宽度参数。主要响应式断点为 1199、959、599px；每块区域都有语义化 class 和注释。网站不需要 `output/` 中的检查脚本。
+```text
+app/                     Next.js 路由和中英文布局
+components/
+  LandingPage.jsx        整页组件组合
+  SiteHeader.jsx         顶栏、滚动态、移动菜单
+  sections/             Hero、能力区、部署区、合作区、页脚
+  demos/BusinessPreview.jsx  AI / 传统管理及 Agent 工作区
+  effects/              WebGL 背景、交互网格、Three.js 粒子
+  forms/DemoForm.jsx     原生 React 预约表单
+  ui/                   按钮、徽标和下载状态菜单
+  shared/               图标、演示配置和样式名称映射
+messages/zh.json         中文文案
+messages/en.json         英文文案
+styles/                  格式化的原视觉样式与局部集成样式
+public/harness/images/   图片
+public/harness/icons/    SVG 和 Logo，保持原素材类别目录
+public/harness/fonts/    原站展示字体
+public/fonts/            原站公共字体
+lib/site.js              公共链接、演示事件及配置
+tools/                   静态预览、源码检查及一次性迁移工具
+```
 
-## 语言与文案
+- 改普通官网文案：编辑 `messages/`。首屏业务演示的双语场景目前在 `BusinessPreview.jsx` 中维护。
+- 改整页顺序：编辑 `LandingPage.jsx`。改某一块：进入对应 `sections/` 文件。
+- 改图标或图片：在 `public/` 对应类别内替换，组件中使用 `/harness/...` 路径。
+- `styles/foundation.css` 包含既有字体、主题变量和工具类；`styles/demos.css` 保留动画及原组件类名。`shared/styleNames.js` 将既有类名映射给组件，不是运行原 webpack 模块。
+- 运行和构建不读取相邻两个镜像目录，没有 iframe、旧 webpack 运行时、HTML 注入或响应字符串替换。
 
-页脚右下角点击展开 `简体中文 / English`，与旧官网一样是选项选择，不是开关。优先采用用户选择并保存到 `localStorage` 的 `rental-os-language`；首次访问根据浏览器首选语言自动选择：`zh` 开头的语言用简体中文，英语及其他所有语言默认英文。手动选择后刷新仍保留。支持键盘上下键、Enter、Escape 和点击外部关闭。
+## 路由与交互边界
 
-HTML 的 `data-i18n` 标记对应 `js/i18n.js` 中的文字键。修改文案时同时更新 HTML 中的中文默认文案及字典中的中英文；翻译只更新文字节点，不重建轮播或数字动画。模板英文字体保留，中文补充系统 UI 字体兜底，不下载新字体。
+- 中文 `/harness/`，英文 `/en/harness/`。根路径进入浏览器语言对应版本；中文以外默认英语，手动选择写入 `NEXT_LOCALE` Cookie。
+- AI 管理、传统管理、预约、履约、门店协同、插件、自动任务和能力卡片保留前端演示。确认操作只产生示例回执，不连接真实 AI 或业务系统。
+- 预约/合作入口共用 React 表单，保留咨询意向预填、人工输入保护、请求标识重试、超时与后端回执判断。线上配置公开构建变量 `NEXT_PUBLIC_DEMO_API_BASE_URL`（HTTPS，含 `/api`）；未配置时不伪造成功。仅本机 HTTP 预览可回落到 `http://127.0.0.1:3000/api`。
+- 顶栏和页脚 GitHub、页脚 X 使用用户指定链接。页脚署名 `Powered by PenG-AI · All rights reserved.`；政策文字保留但不跳转。移动菜单尚保留迁移前已有的原模板外部文档/插件/论文入口，这些不是 Rental OS 自有资源。
+- 原站字体、图标和着色器的来源不因迁移而变化；源码迁移不等于第三方素材已获得新的许可。
 
-## 交互与动效
+## 与旧目录的关系
 
-- Hero 三张轮播、6 秒进度条、300ms 横向滑入和 1 秒文字跟随、按钮悬停彩色光晕；点击和键盘选择、移动端切换按钮。向下滚动时 Hero 以正常速度的 40% 上移，前景浅色内容层逐渐盖住轮播选项。
-- 滚动后的玻璃导航、桌面下拉、移动端菜单。
-- 客户标志滚动和错峰上移入场、区块入场淡入、80ms 一帧的字符小圆点动画。
-- 桌面 XI / RI 卡片悬停弹簧展开（mass 1 / stiffness 210 / damping 30，展开权重 2.7）、XI 原数据浮层、RI 建筑与租约并排；移动端 sticky 堆叠缩放。
-- 客户故事循环轮播和实时跟手拖动；故事大图随滚动从全屏左右各留 24px 收拢到居中基准宽度（最大 1280px），高度不变。滚动进度从视口底部到视口高度的 28%，使用原 cubic-in-out 与 4px 取整。
-- 团队卡片保留按钮、键盘、鼠标拖动和原生触摸滚动；卡片可见时按页面滚动增量的 40% 横移（每事件增量限制 ±150px），沿用 stiffness 110 / damping 28 / mass 0.6 的弹簧参数，上滚反向移动，不是定时轮播。
-- 信任区原 Lottie 动画、指标四重字符滚轮（单字 500ms、逐字延迟 100ms）；点击或按 Enter / 空格可重播。
-- 滚轮阻尼滚动（按原 Lenis 的 lerp .1 重写）；触摸、嵌套滚动区和打开的菜单/弹窗仍使用原生滚动，键盘与外部定位可打断缓动。
-- 底部 WebGL 波纹、页尾 sticky 大字标志。
-- 减少动态效果偏好支持、Cookie 选择本地保存。
+`../deepseek-harness-clone` 是改写版镜像，`../deepseek-harness-original` 是独立原始下载副本。本次不覆盖它们，也不切换既有 8138 / 8139 的入口。
 
-交互源码是重新实现的，动画时序并非作者原始 Framer 时间线逐帧恢复。Lottie 的内部绘图/动画仍来自原 JSON；如需修改内部构图，要编辑该素材，而非修改页面 HTML。
+`migration-manifest.json` 记录原文件清单与迁移边界。`tools/migrate-reference.mjs` 仅用于最初的机械迁移：它读取旧目录并覆盖生成组件，**后续日常开发不要重跑**；直接修改现在的组件、文案和样式即可。新工程复制到其他位置后，安装依赖即可单独开发和构建，不需要带上旧镜像。
 
-## 范围与安全
+Next.js 原生路由与安装说明见 [官方文档](https://nextjs.org/docs/app/getting-started/installation)。
 
-本轮语言与交互检查记录位于上一级 `output/playwright/`，包含系统语言、刷新持久化、选择器键盘操作、双语响应式，以及 Hero 遮挡、大图收拢和团队卡片横移的回归。原模板动效核实历史位于 `apps/primefold-clone/design-qa.md`。这不是上线或跨浏览器验收结论。
+## GitHub 独立官网仓库
 
-官网各处「预约演示」已连接同一个原生弹窗，姓名和联系方式必填，公司/门店及需求说明选填，支持手机、邮箱或微信。提交经后端校验与限流后写入数据库，只有 SaaS 管理员能在「平台管理 → 演示预约」读取分页列表；不会创建租户或客户账号。网络异常保留表单并支持幂等重试。
+发布仓库为 `Xiao0ozZ/rental-os-website`，源码直接位于仓库根目录。推送 main 后，现有 GitHub Pages 工作流会安装依赖、校验源码、构建并仅发布 `out/`；不会发布 node_modules、开发缓存或后端工程。旧官网仍保留在 Git 历史中。
 
-原模板产品、预约平台、登录及社交外链均已移除跳转，暂保留禁用占位；以后拿到新地址再接入。页面内锚点、语言选择和本地偏好仍可用。邮件订阅仅为本地预览反馈，不向第三方发送。图片和动画内部尚有原模板内容，发布前仍需替换并确认许可。
+工作流从 Pages 配置读取 `NEXT_PUBLIC_BASE_PATH`，自动适配 `/rental-os-website` 之类的项目路径；本地开发默认使用域名根路径。手动构建子路径时，PowerShell 使用 `$env:NEXT_PUBLIC_BASE_PATH='/rental-os-website'; npm run build`。构建后 `npm start` 会从生成的 `out/site-config.json` 读取路径，无需再次设置变量。
 
-### 预约接口配置与验证
+`tools/prepare-export.mjs` 为普通静态托管补齐 Next.js 分段预取文件别名并生成 `.nojekyll`，不修改页面内容。字体由构建器打包，品牌 SVG 继续保留在 icons 目录。
 
-- 在 `js/config.js` 的 `apiBaseUrl` 填实际 HTTPS API 前缀（含 `/api`），不得填管理员密钥。留空时只有本机 HTTP 预览会连接 `http://127.0.0.1:3000/api`；线上留空会提示未配置，不会假报成功。
-- API 的 `CORS_ALLOWED_ORIGINS` 加入官网的完整 origin（协议、域名及可选端口），多个用逗号分隔，不带 `/rental-os-website/` 等路径，不用通配符。反向代理部署按实际拓扑设置 `TRUST_PROXY_HOPS`，否则访问者可能共用代理 IP 的限流桶。
-- 部署后端前应用 `20260929120000_platform_demo_requests` 迁移。公开接口为 `POST /api/public/demo-requests`，平台列表为 `GET /api/platform/demo-requests`，后者必须使用 SaaS 管理员登录态。
-- 更新时同步整套 HTML、CSS 和 JS；入口里相关资源使用同一 `v` 版本，修改这批资源时一起递增，防止旧 CSS/翻译字典与新弹窗混用。所有资源路径保持相对路径。
-- 仓库根运行 `npm run test:demo-requests` 验证校验、权限、幂等、限流及链接；`npm run test:demo-requests-db` 使用本机 MySQL 管理凭据创建临时独立库，验证真实迁移和持久化后仅删除本次创建的测试库。
-
-图片、字体、标志与原动画的权利归原作者/权利人；商用发布前需确认模板及素材许可。Lottie 播放器使用 [lottie-web 5.13.0](https://github.com/airbnb/lottie-web)，MIT 许可文件随播放器保存在 `assets/vendor/`。
+如需接通线上预约提交，在仓库 Actions 变量中配置公开的 `NEXT_PUBLIC_DEMO_API_BASE_URL`，值为实际 HTTPS API 前缀（含 `/api`），并在后端允许官网来源。本次不写入密钥、不猜测 API 地址，未配置时不会伪报预约成功。

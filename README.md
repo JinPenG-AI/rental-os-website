@@ -69,7 +69,7 @@ Next.js 原生路由与安装说明见 [官方文档](https://nextjs.org/docs/ap
 
 ## GitHub 独立官网仓库
 
-发布仓库为 `Xiao0ozZ/rental-os-website`，源码直接位于仓库根目录。推送 main 后，现有 GitHub Pages 工作流会安装依赖、校验源码、构建并仅发布 `out/`；不会发布 node_modules、开发缓存或后端工程。旧官网仍保留在 Git 历史中。
+发布仓库为 `JinPenG-AI/rental-os-website`（旧地址 `Xiao0ozZ/rental-os-website` 已由 GitHub 重定向），源码直接位于仓库根目录。推送 main 后，现有 GitHub Pages 工作流会安装依赖、校验源码、构建并仅发布 `out/`；不会发布 node_modules、开发缓存或后端工程。旧官网仍保留在 Git 历史中。
 
 工作流从 Pages 配置读取 `NEXT_PUBLIC_BASE_PATH`，自动适配 `/rental-os-website` 之类的项目路径；本地开发默认使用域名根路径。手动构建子路径时，PowerShell 使用 `$env:NEXT_PUBLIC_BASE_PATH='/rental-os-website'; npm run build`。构建后 `npm start` 会从生成的 `out/site-config.json` 读取路径，无需再次设置变量。
 
